@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Leis Municipais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        law: {
+                            navy: "#0B1C3F",
+                            navy2: "#122553",
+                            gold: "#C8A356",
+                        },
+                    },
+                    boxShadow: {
+                        soft: "0 8px 24px rgba(2,6,23,.08)",
+                    },
+                    fontFamily: {
+                        inter: ["Inter", "system-ui", "sans-serif"],
+                        merri: ["Merriweather", "serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        /* Estilos base para todas as células da tabela (apenas padding vertical e alinhamento) */
+        th,
+        td {
+            @apply py-3 text-left;
+        }
+
+        /* Preenchimento horizontal específico para cada coluna e LARGURAS FIXAS */
+        th:nth-child(1),
+        td:nth-child(1) {
+            /* Coluna 'Ano' */
+            @apply pl-8 pr-4;
+            width: 8%;
+            /* Largura fixa */
+            min-width: 60px;
+            /* Largura mínima para evitar colapso */
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            /* Coluna 'Número' */
+            @apply px-4;
+            width: 8%;
+            /* Largura fixa */
+            min-width: 60px;
+            /* Largura mínima para evitar colapso */
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            /* Coluna 'Tipo' */
+            @apply pr-12 pl-8;
+            width: 12%;
+            /* Largura fixa */
+            min-width: 90px;
+            /* Largura mínima para evitar colapso */
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            /* Coluna 'Categoria' */
+            @apply px-4;
+            width: 15%;
+            /* Largura fixa */
+            min-width: 120px;
+            /* Largura mínima para evitar colapso */
+        }
+
+        th:nth-child(5),
+        td:nth-child(5) {
+            /* Coluna 'Descrição' */
+            @apply px-4;
+            width: 45%;
+            /* Largura fixa, maior para o texto */
+            min-width: 300px;
+            /* Largura mínima para garantir espaço suficiente */
+        }
+
+        th:nth-child(6),
+        td:nth-child(6) {
+            /* Coluna 'Link' */
+            @apply pl-4 pr-1;
+            width: 12%;
+            /* Largura fixa para o botão */
+            min-width: 80px;
+            /* Largura mínima para o botão */
+        }
+
+        th {
+            @apply bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg;
+        }
+
+        tr:nth-child(even) {
+            @apply bg-white;
+        }
+
+        tr:nth-child(odd) {
+            @apply bg-slate-50;
+        }
+
+        tr:hover {
+            @apply bg-slate-100 transition-colors duration-200 ease-in-out;
+        }
+
+        /* Scrollbar do painel de resultados */
+        .scroll-area::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .scroll-area::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Estilo para a palavra destacada */
+        strong {
+            background-color: #fde047;
+            /* Cor amarela similar a 'yellow-300' */
+            border-radius: 0.125rem;
+            /* similar a 'rounded-sm' */
+            padding: 0.125rem 0.25rem;
+            /* similar a 'px-1 py-0.5' */
+            box-decoration-break: clone;
+            color: #122553;
+            /* Cor do texto, similar a 'law-navy2' */
+            box-shadow: inset 0 2px 4px 0 rgba(253, 224, 71, 0.5);
+            /* Sombra interna amarela */
+            font-weight: 700;
+            /* similar a 'font-bold' */
+            ;
+        }
+    </style>
+</head>
+
+<body class="relative bg-gradient-to-br from-[#acdfe2] to-slate-200 p-4 sm:p-6 flex flex-col justify-center xl:items-center">
+
+    <!-- Layer de watermark (fundo) -->
+   
+    <h1 class="absolute bottom-2 right-2 text-sm text-gray-500">
+        © 2025 - Esta aplicação foi desenvolvida pelo quadro efetivo da Coordenadoria de Controle Interno, 
+        reafirmando o compromisso institucional com a transparência e a legalidade.
+    </h1>
+ 
+    <div class="relative z-10 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col w-[1200px] text-center overflow-auto">
+        <div class="relative flex-shrink-0">
+            <h1 class="text-3xl sm:text-4xl font-bold text-center text-law-navy font-medium tracking-tight mb-4">
+              <span class="inline-flex items-center gap-3">
+                Busca de Legislação Municipal
+              </span>
+            </h1>
+          
+            <p class="text-center text-slate-600 text-sm mt-2 mb-8">
+              Desenvolvido pela Coordenadoria de Controle Interno do Município de Goiana/Pe.
+            </p>
+          
+            <div class="mb-8 text-center space-y-3">
+              <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">
+                Carregando dados da planilha...
+              </p>
+              <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
+              <p id="localFileWarning"
+                 class="text-amber-700 text-sm mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
+                ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não
+                funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web
+                local (ex: `python -m http.server` ou `http-server`).
+              </p>
+            </div>
+          </div>
+          
+          
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0">
+            <div class="flex flex-col">
+                <label for="ano" class="text-slate-700 text-sm font-semibold mb-2">Ano:</label>
+                <input type="text" id="ano" placeholder="Ex: 2025"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="tipo" class="text-slate-700 text-sm font-semibold mb-2">Tipo:</label>
+                <select id="tipo"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
+                    <option value="">Todos</option>
+                    <option value="Ordinária">Lei Ordinária</option>
+                    <option value="Complementar">Lei Complementar</option>
+                    <option value="Emenda lei orgânica">Emenda lei orgânica</option>
+                    <option value="Decreto">Decreto</option>
+                    <option value="Decreto orçamentário">Decreto orçamentário</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col lg:col-span-2">
+                <label for="categoria" class="text-slate-700 text-sm font-semibold mb-2">Categoria:</label>
+                <select id="categoria"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
+                    <option value="">Todas</option>
+                    <option value="ASSISTÊNCIA SOCIAL">ASSISTÊNCIA SOCIAL</option>
+                    <option value="COMÉRCIO E INDÚSTRIA">COMÉRCIO E INDÚSTRIA</option>
+                    <option value="CONSELHOS MUNICIPAIS">CONSELHOS MUNICIPAIS</option>
+                    <option value="CULTURA">CULTURA</option>
+                    <option value="DESAPROPRIAÇÃO">DESAPROPRIAÇÃO</option>
+                    <option value="EDUCAÇÃO">EDUCAÇÃO</option>
+                    <option value="INCENTIVOS FISCAIS">INCENTIVOS FISCAIS</option>
+                    <option value="LICITAÇÕES E CONTRATOS">LICITAÇÕES E CONTRATOS</option>
+                    <option value="MEIO AMBIENTE">MEIO AMBIENTE</option>
+                    <option value="OBRAS E EDIFICAÇÕES">OBRAS E EDIFICAÇÕES</option>
+                    <option value="ORÇAMENTO E FINANÇAS">ORÇAMENTO E FINANÇAS</option>
+                    <option value="OUTROS">OUTROS</option>
+                    <option value="PLANEJAMENTO URBANO">PLANEJAMENTO URBANO</option>
+                    <option value="REFORMA ADMINSITRATIVA">REFORMA ADMINSITRATIVA</option>
+                    <option value="SAÚDE PÚBLICA">SAÚDE PÚBLICA</option>
+                    <option value="SEGURANÇA PÚBLICA">SEGURANÇA PÚBLICA</option>
+                    <option value="SERVIDORES PÚBLICOS">SERVIDORES PÚBLICOS</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col lg:col-span-4">
+                <label for="palavra" class="text-slate-700 text-sm font-semibold mb-2">Palavra-chave (Nº de
+                    Lei/Título/Ementa/Descrição):</label>
+                <input type="text" id="palavra" placeholder="Ex: orçamento, licitação, servidor"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
+            </div>
+        </div>
+
+        <div
+            class="scroll-area mt-8 p-6 bg-slate-50 rounded-lg shadow-inner border border-slate-100 flex-grow overflow-y-auto">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4 border-b-2 pb-2 border-law-gold/50">
+                Resultados da pesquisa (<span id="resultsCount">0</span> Leis e Decretos encontrados):
+            </h2>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+                <div class="flex items-center gap-2">
+                    <label for="itemsPerPage" class="text-slate-700 text-sm font-semibold">Leis por página:</label>
+                    <select id="itemsPerPage"
+                        class="p-2 border border-slate-300 rounded-md focus:ring-law-navy focus:border-law-navy transition duration-200 ease-in-out shadow-sm">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div id="paginationControls" class="flex items-center gap-2">
+                    <button id="startIndexPageBtn"
+                        class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50"
+                        disabled>Primeira</button>
+                    <button id="prevPageBtn"
+                        class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50"
+                        disabled>Anterior</button>
+                    <span id="pageInfo" class="text-slate-700 text-sm font-medium">Página 1 de 1</span>
+                    <button id="nextPageBtn"
+                        class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50"
+                        disabled>Próxima</button>
+                    <button id="endIndexPageBtn"
+                        class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50"
+                        disabled>Última</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg shadow-md border border-slate-200">
+                <table id="tabelaResultados" class="min-w-full divide-y divide-slate-200 table-fixed">
+                    <thead>
+                        <tr>
+                            <th class="rounded-tl-lg">Ano</th>
+                            <th>Número</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th class="rounded-tr-lg">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <p id="noResultsMessage" class="text-slate-600 text-center py-8 hidden bg-white rounded-b-lg">Nenhuma
+                    lei encontrada.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7ollrDhKhlyCtPnTQsMlFK2AmzNXA32LM1P7pvCzuJvaW6c23glm5-wbJWjrdzAKWydX2W81NidKK/pub?output=csv";
+        let allLaws = [];
+        let filteredLaws = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+
+        const tabelaResultadosBody = document.querySelector("#tabelaResultados tbody");
+        const resultsCountSpan = document.getElementById("resultsCount");
+        const loadingMessage = document.getElementById("loadingMessage");
+        const errorMessage = document.getElementById("errorMessage");
+        const noResultsMessage = document.getElementById("noResultsMessage");
+        const localFileWarning = document.getElementById("localFileWarning");
+
+        const itemsPerPageSelect = document.getElementById("itemsPerPage");
+        const startIndexPageBtn = document.getElementById("startIndexPageBtn");
+        const prevPageBtn = document.getElementById("prevPageBtn");
+        const nextPageBtn = document.getElementById("nextPageBtn");
+        const pageInfoSpan = document.getElementById("pageInfo");
+        const endIndexPageBtn = document.getElementById("endIndexPageBtn");
+
+        const anoInput = document.getElementById("ano");
+        const tipoSelect = document.getElementById("tipo");
+        const categoriaSelect = document.getElementById("categoria");
+        const palavraInput = document.getElementById("palavra");
+
+        function showErrorMessage(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+            loadingMessage.classList.add('hidden');
+            noResultsMessage.classList.add('hidden');
+        }
+
+        function hideErrorMessage() {
+            errorMessage.classList.add('hidden');
+        }
+
+        async function carregarDados() {
+            loadingMessage.classList.remove('hidden');
+            hideErrorMessage();
+            tabelaResultadosBody.innerHTML = '';
+            resultsCountSpan.textContent = '0';
+            noResultsMessage.classList.add('hidden');
+
+            if (window.location.protocol === 'file:') {
+                localFileWarning.classList.remove('hidden');
+                showErrorMessage('Falha ao carregar a planilha. Restrição de segurança do navegador (CORS).');
+                tabelaResultadosBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Erro: Execute em um servidor web.</td></tr>`;
+                return;
+            } else {
+                localFileWarning.classList.add('hidden');
+            }
+
+            try {
+                const resposta = await fetch(URL_CSV);
+                if (!resposta.ok) {
+                    throw new Error(`Erro de rede ou URL inválido: ${resposta.status} ${resposta.statusText}`);
+                }
+                const rawCsvText = await resposta.text();
+                allLaws = csvParaJSON(rawCsvText);
+                console.log("✅ Dados carregados:", allLaws);
+                buscarLeis();
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+                showErrorMessage(`Falha ao carregar a planilha: ${error.message}. Verifique o URL e as permissões de publicação.`);
+                tabelaResultadosBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Erro ao carregar dados.</td></tr>`;
+                resultsCountSpan.textContent = '0';
+            } finally {
+                loadingMessage.classList.add('hidden');
+            }
+        }
+
+        function csvParaJSON(csv) {
+            const linhas = csv.split("\n")
+                .map(l => l.trim())
+                .filter(l => l);
+
+            if (linhas.length === 0) return [];
+
+            const linhaCabecalhoIndex = linhas.findIndex((l, index) => index >= 4 && l.toLowerCase().includes("ano"));
+            if (linhaCabecalhoIndex === -1) {
+                console.error("Cabeçalho 'ano' não encontrado no CSV a partir da linha 5.");
+                return [];
+            }
+
+            const cabecalhos = linhas[linhaCabecalhoIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+                .map(h => h.replace(/^"|"$/g, "").trim().toLowerCase());
+
+            console.log("Cabeçalhos CSV normalizados:", cabecalhos);
+
+            return linhas.slice(linhaCabecalhoIndex + 1).map(linha => {
+                const valores = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const obj = {};
+                cabecalhos.forEach((coluna, i) => {
+                    obj[coluna] = valores[i] ? valores[i].replace(/^"|"$/g, "").trim() : "";
+                });
+                return obj;
+            });
+        }
+
+        // Função para destacar a palavra-chave nos resultados
+        function destacarPalavraChave(texto, palavra) {
+            if (!palavra || !texto) {
+                return texto;
+            }
+            const regex = new RegExp(`(${palavra})`, 'gi');
+            return texto.replace(regex, '<strong>$1</strong>');
+        }
+
+        function buscarLeis() {
+            const anoFiltro = anoInput.value.trim();
+            const tipoFiltro = tipoSelect.value.trim().toLowerCase();
+            const categoriaFiltro = categoriaSelect.value.trim().toLowerCase();
+            const palavraFiltro = palavraInput.value.trim().toLowerCase();
+
+            filteredLaws = allLaws.filter(item => {
+                const anoDoItem = item["ano"] || "";
+                const descricaoDoItem = item["descrição"] || "";
+
+                const tipoDoItem = (item["tipo"] || "").toLowerCase();
+                const categoriaDoItem = (item["categoria"] || "").toLowerCase();
+
+                const anoOk = !anoFiltro || (anoDoItem === anoFiltro);
+                const tipoOk = !tipoFiltro || (tipoDoItem === tipoFiltro);
+                const categoriaOk = !categoriaFiltro || (categoriaDoItem === categoriaFiltro);
+                const palavraOk = !palavraFiltro || descricaoDoItem.toLowerCase().includes(palavraFiltro);
+
+                return anoOk && tipoOk && categoriaOk && palavraOk;
+            });
+
+            currentPage = 1;
+            exibirLeisPaginadas();
+        }
+
+        function exibirLeisPaginadas() {
+            tabelaResultadosBody.innerHTML = "";
+            noResultsMessage.classList.add('hidden');
+
+            const palavraFiltro = palavraInput.value.trim();
+
+            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
+            pageInfoSpan.textContent = `Página ${currentPage} de ${totalPages || 1}`;
+
+            startIndexPageBtn.disabled = currentPage === 1 || filteredLaws.length === 0;
+            prevPageBtn.disabled = currentPage === 1 || filteredLaws.length === 0;
+            nextPageBtn.disabled = currentPage === totalPages || filteredLaws.length === 0;
+            endIndexPageBtn.disabled = currentPage === totalPages || filteredLaws.length === 0;
+
+            if (filteredLaws.length === 0) {
+                noResultsMessage.classList.remove('hidden');
+                resultsCountSpan.textContent = '0';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const lawsToDisplay = filteredLaws.slice(startIndex, endIndex);
+
+            lawsToDisplay.forEach((item, idx) => {
+                const linha = document.createElement("tr");
+
+                // aplica cor alternada (zebra striping)
+                linha.className = (idx % 2 === 0 ? "bg-white" : "bg-gray-70") + " hover:bg-gray-100";
+
+
+
+
+
+                const descricaoDestacada = destacarPalavraChave(item["descrição"] || "", palavraFiltro);
+
+                linha.innerHTML = `
+                    <td class="py-3 font-semibold text-slate-800 text-center">${item["ano"] || ""}</td>
+                    <td class="py-3 text-slate-700 text-center">${item["número"] || item["numero"] || ""}</td>
+                    <td class="py-3 text-slate-700 text-center">${item["tipo"] || ""}</td>
+                    <td class="py-3 text-slate-700 text-center">${item["categoria"] || ""}</td>
+                    <td class="py-3 text-slate-700 break-words">${descricaoDestacada}</td>
+                    <td class="py-3 text-center">
+                        <a href="${item["link da lei"] || item["link"] || "#"}" target="_blank"
+                        class="inline-flex items-center justify-center gap-1 bg-law-navy hover:bg-law-navy2 active:bg-law-navy2 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L14.414 5A2 2 0 0115 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1-3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                            </svg>
+                            Acessar
+                        </a>
+                    </td>
+                `;
+                tabelaResultadosBody.appendChild(linha);
+            });
+
+            resultsCountSpan.textContent = filteredLaws.length;
+        }
+
+        // Função para implementar o debounce
+        function debounce(func, delay) {
+            let timeout;
+            return function (...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        const buscarLeisDebounced = debounce(buscarLeis, 300);
+        anoInput.addEventListener("input", buscarLeisDebounced);
+        tipoSelect.addEventListener("change", buscarLeisDebounced);
+        categoriaSelect.addEventListener("change", buscarLeisDebounced);
+        palavraInput.addEventListener("input", buscarLeisDebounced);
+
+        itemsPerPageSelect.addEventListener("change", (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1;
+            exibirLeisPaginadas();
+        });
+
+        startIndexPageBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage = 1;
+                exibirLeisPaginadas();
+            }
+        });
+
+        prevPageBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                exibirLeisPaginadas();
+            }
+        });
+
+        nextPageBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                exibirLeisPaginadas();
+            }
+        });
+
+        endIndexPageBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage = totalPages;
+                exibirLeisPaginadas();
+            }
+        });
+
+        carregarDados();
+    </script>
+</body>
+
+</html>
