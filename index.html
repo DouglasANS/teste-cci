@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Busca de Leis Municipais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -157,13 +157,6 @@
 </head>
 
 <body class="relative bg-gradient-to-br from-[#acdfe2] to-slate-200 p-4 sm:p-6 flex flex-col justify-center xl:items-center">
-
-    <!-- Layer de watermark (fundo) -->
-   
-    <h1 class="absolute bottom-2 right-2 text-sm text-gray-500">
-        © 2025 - Esta aplicação foi desenvolvida pelo quadro efetivo da Coordenadoria de Controle Interno, 
-        reafirmando o compromisso institucional com a transparência e a legalidade.
-    </h1>
  
     <div class="relative z-10 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col w-[1200px] text-center overflow-auto">
         <div class="relative flex-shrink-0">
@@ -193,15 +186,15 @@
           
           
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0">
             <div class="flex flex-col">
-                <label for="ano" class="text-slate-700 text-sm font-semibold mb-2">Ano:</label>
+                <label for="ano" class="text-slate-700 text-sm font-semibold mb-2 text-left">Ano:</label>
                 <input type="text" id="ano" placeholder="Ex: 2025"
                     class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
             </div>
 
             <div class="flex flex-col">
-                <label for="tipo" class="text-slate-700 text-sm font-semibold mb-2">Tipo:</label>
+                <label for="tipo" class="text-slate-700 text-sm font-semibold mb-2 text-left">Tipo:</label>
                 <select id="tipo"
                     class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
                     <option value="">Todos</option>
@@ -214,7 +207,7 @@
             </div>
 
             <div class="flex flex-col lg:col-span-2">
-                <label for="categoria" class="text-slate-700 text-sm font-semibold mb-2">Categoria:</label>
+                <label for="categoria" class="text-slate-700 text-sm font-semibold mb-2 text-left">Categoria:</label>
                 <select id="categoria"
                     class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
                     <option value="">Todas</option>
@@ -239,7 +232,7 @@
             </div>
 
             <div class="flex flex-col lg:col-span-4">
-                <label for="palavra" class="text-slate-700 text-sm font-semibold mb-2">Palavra-chave (Nº de
+                <label for="palavra" class=" font-semibold mb-2 text-left">Palavra-chave (Nº de
                     Lei/Título/Ementa/Descrição):</label>
                 <input type="text" id="palavra" placeholder="Ex: orçamento, licitação, servidor"
                     class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
@@ -299,6 +292,11 @@
                     lei encontrada.</p>
             </div>
         </div>
+
+        <h1 class="mt-10 bottom-2 right-2 text-sm text-gray-500">
+            © 2025 - Esta aplicação foi desenvolvida pelo quadro efetivo da Coordenadoria de Controle Interno, 
+            reafirmando o compromisso institucional com a transparência e a legalidade.
+        </h1>
     </div>
 
     <script>
