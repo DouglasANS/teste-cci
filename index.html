@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1">
+
+
     <title>Busca de Leis Municipais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -156,35 +158,37 @@
     </style>
 </head>
 
-<body class="relative bg-gradient-to-br from-[#acdfe2] to-slate-200 p-4 sm:p-6 flex flex-col justify-center xl:items-center">
- 
-    <div class="relative z-10 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col w-[1200px] text-center overflow-auto">
+<body
+    class="relative bg-gradient-to-br from-[#acdfe2] to-slate-200 p-4 sm:p-6 flex flex-col justify-center xl:items-center">
+
+    <div
+        class="relative z-10 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col w-[1200px] text-center overflow-auto">
         <div class="relative flex-shrink-0">
             <h1 class="text-3xl sm:text-4xl font-bold text-center text-law-navy font-medium tracking-tight mb-4">
-              <span class="inline-flex items-center gap-3">
-                Busca de Legislação Municipal
-              </span>
+                <span class="inline-flex items-center gap-3">
+                    Busca de Legislação Municipal
+                </span>
             </h1>
-          
+
             <p class="text-center text-slate-600 text-sm mt-2 mb-8">
-              Desenvolvido pela Coordenadoria de Controle Interno do Município de Goiana/Pe.
+                Desenvolvido pela Coordenadoria de Controle Interno do Município de Goiana/Pe.
             </p>
-          
+
             <div class="mb-8 text-center space-y-3">
-              <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">
-                Carregando dados da planilha...
-              </p>
-              <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
-              <p id="localFileWarning"
-                 class="text-amber-700 text-sm mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
-                ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não
-                funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web
-                local (ex: `python -m http.server` ou `http-server`).
-              </p>
+                <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">
+                    Carregando dados da planilha...
+                </p>
+                <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
+                <p id="localFileWarning"
+                    class="text-amber-700 text-sm mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
+                    ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não
+                    funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web
+                    local (ex: `python -m http.server` ou `http-server`).
+                </p>
             </div>
-          </div>
-          
-          
+        </div>
+
+
 
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0">
             <div class="flex flex-col">
@@ -294,12 +298,18 @@
         </div>
 
         <h1 class="mt-10 bottom-2 right-2 text-sm text-gray-500">
-            © 2025 - Esta aplicação foi desenvolvida pelo quadro efetivo da Coordenadoria de Controle Interno, 
+            © 2025 - Esta aplicação foi desenvolvida pelo quadro efetivo da Coordenadoria de Controle Interno,
             reafirmando o compromisso institucional com a transparência e a legalidade.
         </h1>
     </div>
 
     <script>
+
+        const viewport = document.getElementById('viewport-meta');
+        if (window.innerWidth <= 768) { // celular / telas pequenas
+            viewport.setAttribute('content', 'width=600, initial-scale=0.2');
+        }
+
         const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7ollrDhKhlyCtPnTQsMlFK2AmzNXA32LM1P7pvCzuJvaW6c23glm5-wbJWjrdzAKWydX2W81NidKK/pub?output=csv";
         let allLaws = [];
         let filteredLaws = [];
